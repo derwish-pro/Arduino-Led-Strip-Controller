@@ -8,11 +8,11 @@
 #include "LedStrip.h"
 
 
-LedStrip::LedStrip(int r, int g, int b)
+LedStrip::LedStrip(int r_pin, int g_pin, int b_pin,bool invertPWM)
 {
-	led_r = Led(r);
-	led_g = Led(g);
-	led_b = Led(b);
+	led_r = Led(r_pin, invertPWM);
+	led_g = Led(g_pin, invertPWM);
+	led_b = Led(b_pin, invertPWM);
 }
 
 

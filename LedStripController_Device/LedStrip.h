@@ -13,7 +13,7 @@
 class LedStrip
 {
 public:
-	LedStrip(int r, int g, int b);
+	LedStrip(int r_pin, int g_pin, int b_pin, bool invertPWM = false);
 	void SetColor(int r, int g, int b);
 	void SetColor(uint32_t);
 	void FadeToColor(uint8_t r, uint8_t g, uint8_t b, unsigned int fadeTime);

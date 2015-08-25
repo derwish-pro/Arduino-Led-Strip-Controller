@@ -8,7 +8,10 @@
 
 #include "Led.h"
 
-Led::Led(uint8_t pin) {
+
+
+Led::Led(uint8_t pin, bool invertPWM) {
+	this->invertPWM = invertPWM;
 	this->pin = pin;
 
 	isOn = false;
@@ -22,7 +25,7 @@ Led::Led(uint8_t pin) {
 	fadeOnOff_current_brightness = 0;
 	fadeOnOff_time_remain = 0;
 
-	SetBrightness(255);
+	SetBrightness(brightness);
 }
 
 
@@ -66,8 +69,8 @@ bool Led::IsOn() {
 void Led::WritePWM()
 {
 
-//	Serial.print(fadeOnOff_current_brightness);
-//	Serial.print(" ");
+	//	Serial.print(fadeOnOff_current_brightness);
+	//	Serial.print(" ");
 
 
 	if (!isOn)
@@ -75,15 +78,19 @@ void Led::WritePWM()
 	else {
 		current_value = brightness;
 
-//		Serial.print(current_value);
-//		Serial.print(" ");
+		//		Serial.print(current_value);
+		//		Serial.print(" ");
 		current_value = (uint32_t)(current_value*fadeOnOff_current_brightness / 100);
-//		Serial.print(current_value);
-//		Serial.println(" ");
+		//		Serial.print(current_value);
+		//		Serial.println(" ");
 	}
 
 	//!!!! INVERTED PWM VALUES !!!!
-	analogWrite(pin, 255 - current_value);
+	if (invertPWM)
+		analogWrite(pin, 255 - current_value);
+	else
+		analogWrite(pin, current_value);
+
 }
 
 

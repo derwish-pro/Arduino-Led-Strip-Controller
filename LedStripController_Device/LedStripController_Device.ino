@@ -3,8 +3,9 @@
 #include "SerialCommand.h"
 #include <EEPROM.h>
 
+#define LED_STRIP_INVERT_PWM false
 
-LedStrip ledStrip(9, 10, 11);
+LedStrip ledStrip(9, 10, 11, LED_STRIP_INVERT_PWM);
 #define LedEnablePin1 6
 #define LedEnablePin2 7
 

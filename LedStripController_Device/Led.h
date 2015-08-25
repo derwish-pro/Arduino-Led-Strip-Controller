@@ -12,7 +12,7 @@
 
 class Led {
 public:
-	Led(uint8_t pin=13);
+	Led(uint8_t pin=13, bool invertPWM =false);
 	void Loop();
 	void SetBrightness(uint8_t brightness);
 	uint8_t GetBrightness();
@@ -20,6 +20,7 @@ public:
 	void TurnOn();
 	void TurnOff();
 	bool IsOn();
+
 
 
 	//STROBE
@@ -46,7 +47,7 @@ private:
 	uint8_t current_value;
 	bool isOn;
 	void WritePWM();
-
+	bool invertPWM;
 
 	//STROBE
 	bool strobe_current_brightness;

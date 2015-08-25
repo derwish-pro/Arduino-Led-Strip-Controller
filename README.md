@@ -7,14 +7,14 @@ Favorite color may be written in EEPROM.<br><br>
 
 ## Connections
 Connect On/Off button to Arduino pin 3 and GND (the resistor is not required).<br><br>
-If you use L298N, connect led strip as follows:<br>
+If you use L298N, connect the led strip as follows:<br>
 IN1 > Arduino pin 9<br>
 IN2 > Arduino pin 10<br>
 IN3 > Arduino pin 11<br>
 ENA > Arduino pin 6<br>
-ENB > Arduino pin 6<br><br>
+ENB > Arduino pin 6<br>
 GND > Arduino pin GND<br><br>
-The Arduino can be powered from L298N (5V pin), but you can`t control the led-strip using windows app.<br>
-Set LED_STRIP_INVERT_PWM to true.
+The Arduino can be powered from L298N (5V pin), but you can`t control the led strip using windows app.<br>
+Set LED_STRIP_INVERT_PWM to true.<br><br>
 If you use transistors instead of L298N, connect transistors to pins 9,10,11.<br><br>
 

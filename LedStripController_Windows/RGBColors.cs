@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace LedStripController_Windows
 {
+
     static class RGBColors
     {
         /* 
@@ -53,6 +54,7 @@ namespace LedStripController_Windows
 
         */
 
+        static Random random = new Random();
 
         public static void ConvertRGBToHue1536(uint r, uint g, uint b, out uint hue, out float brightness)
         {
@@ -68,7 +70,7 @@ namespace LedStripController_Windows
 
                 if (r > g)
                 {
-                    r = (uint) (1f/brightness*r);
+                    r = (uint)(1f / brightness * r);
                     g = 0;
                 }
                 else
@@ -84,7 +86,7 @@ namespace LedStripController_Windows
 
                 if (r > b)
                 {
-                    r = (uint) (1f/brightness*r);
+                    r = (uint)(1f / brightness * r);
                     b = 0;
                 }
                 else
@@ -142,12 +144,46 @@ namespace LedStripController_Windows
 
 
 
-        //todo
-        /*  public static void ConvertRGBToHue768(uint r, uint g, uint b, out uint hue, out uint brightness)
+
+         public static void ConvertRGBToHue768(uint r, uint g, uint b, out uint hue, out float brightness)
           {
+            hue = 0;
+            brightness = 0;
+
+            //exclude min value
+            uint minColor = Math.Min(r, Math.Min(g, b));
+             if (r == minColor)
+                 r = 0;
+            else if (g == minColor)
+                g = 0;
+            else if (b == minColor)
+                b = 0;
 
 
-          }*/
+            //calculate color
+            if (r >= 0 && g >= 0 && b == 0)
+            {
+                brightness =  (float)(r + g)/255;
+                r = (uint)(1f / brightness * r);
+                g = (uint)(1f / brightness * g);
+                hue = g;
+            }
+            else if (r == 0 && g >= 0 && b >= 0)
+            {
+                brightness = (float)(g + b) / 255;
+                g = (uint)(1f / brightness * g);
+                b = (uint)(1f / brightness * b);
+                hue = 256+b;
+            }
+            else //if (r >= 0 && g == 0 && b >= 0)
+            {
+                brightness = (float)(r + b) / 255;
+                r = (uint)(1f / brightness * r);
+                b = (uint)(1f / brightness * b);
+                hue = 512 + r;
+            }
+
+        }
 
 
 
@@ -234,6 +270,28 @@ namespace LedStripController_Windows
             r = (uint)(brightness * r);
             g = (uint)(brightness * g);
             b = (uint)(brightness * b);
+        }
+
+        public static float GetRandomBrightness()
+        {
+            return random.Next(0, 1);
+        }
+
+        public static uint GetRandomHue1536()
+        {
+            return (uint)random.Next(0, 1535);
+        }
+
+        public static uint GetRandomHue768()
+        {
+            return (uint)random.Next(0, 767);
+        }
+
+        public static void GetRandomRGB(out uint r, out uint g, out uint b)
+        {
+            r = (uint)random.Next(0, 255);
+            g = (uint)random.Next(0, 255);
+            b = (uint)random.Next(0, 255);
         }
     }
 }

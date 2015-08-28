@@ -8,25 +8,54 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid Margin="70">
-            <ToggleSwitch x:Name="toggleSwitch" Header="" HorizontalAlignment="Left"  VerticalAlignment="Top" Toggled="toggleSwitch_Toggled"  IsOn="True" Height="39" Width="152" >
-                <ToggleSwitch.RenderTransform>
-                    <CompositeTransform ScaleX="2" ScaleY="2"/>
-                </ToggleSwitch.RenderTransform>
-            </ToggleSwitch>
-            <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="75" Margin="0,507,0,0" VerticalAlignment="Top" Width="874">
-                <Slider x:Name="slider4" Margin="253,22,26,9" ValueChanged="slider4_ValueChanged" Maximum="3000" Value="500"/>
-            </Border>
-            <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="74" Margin="0,428,0,0" VerticalAlignment="Top" Width="540"/>
+        <Grid Margin="70,70,70,30">
 
-            <Slider x:Name="slider1" Margin="10,180,0,0" VerticalAlignment="Top" Maximum="255" ValueChanged="slider1_ValueChanged"/>
-            <Slider x:Name="slider2" Margin="10,240,0,0" VerticalAlignment="Top" Maximum="255" ValueChanged="slider1_ValueChanged"/>
-            <Slider x:Name="slider3" Margin="10,300,0,0" VerticalAlignment="Top" Maximum="255" ValueChanged="slider1_ValueChanged"/>
-            <Button x:Name="button" Content="Store to startup preset" HorizontalAlignment="Right" Margin="248,370,0,0" VerticalAlignment="Top" Height="45" Width="225" Background="#33FFFFFF" Click="button_Click"/>
-            <Button x:Name="button1" Content="Simple" HorizontalAlignment="Right" Margin="248,28,0,0" VerticalAlignment="Top" Background="#33FFFFFF" Height="45" Width="225" Click="button1_Click" Visibility="Collapsed"/>
-            <Button x:Name="button2" Content="Fade to random" HorizontalAlignment="Left" Margin="10,446,0,0" VerticalAlignment="Top" Height="45" Width="225" Background="#33FFFFFF"  BorderBrush="Black" Click="button2_Click"/>
-            <Button x:Name="button3" Content="Start faiding rainbow" HorizontalAlignment="Left" Margin="252,446,0,0" VerticalAlignment="Top" Height="45" Width="225" Background="#33FFFFFF"  BorderBrush="Black" Click="button3_Click" />
-            <Button x:Name="button4" Content="Start strobing" HorizontalAlignment="Left" Margin="10,525,0,0" VerticalAlignment="Top" Height="45" Width="225" Background="#33FFFFFF"  BorderBrush="Black" Click="button4_Click" />
+
+
+            <Grid  Height="370"  Margin="0,0,0,0" VerticalAlignment="Top" BorderBrush="#4C000000" BorderThickness="2">
+                <ToggleSwitch x:Name="toggleSwitch" Margin="10" Header="" HorizontalAlignment="Left"  VerticalAlignment="Top" Toggled="toggleSwitch_Toggled"  IsOn="True" Height="39" Width="152" >
+                    <ToggleSwitch.RenderTransform>
+                        <CompositeTransform ScaleX="2" ScaleY="2"/>
+                    </ToggleSwitch.RenderTransform>
+                </ToggleSwitch>
+                <Slider x:Name="slider1" Margin="10,150,10,0" VerticalAlignment="Top" Maximum="255" ValueChanged="slider1_ValueChanged"/>
+            <Slider x:Name="slider2" Margin="10,200,10,0" VerticalAlignment="Top" Maximum="255" ValueChanged="slider1_ValueChanged"/>
+            <Slider x:Name="slider3" Margin="10,250,10,0" VerticalAlignment="Top" Maximum="255" ValueChanged="slider1_ValueChanged"/>
+            <Button x:Name="button" Content="Store to startup preset" HorizontalAlignment="Right" Margin="248,300,10,0" VerticalAlignment="Top" Height="45" Width="225" Background="#33FFFFFF" Click="button_Click"/>
+            <Button x:Name="button1" Content="Simple" HorizontalAlignment="Right" Margin="248,28,10,0" VerticalAlignment="Top" Background="#33FFFFFF" Height="45" Width="225" Click="button1_Click" Visibility="Collapsed"/>
+            </Grid>
+
+
+
+
+            <Grid  Height="70"  Margin="0,500,0,0" VerticalAlignment="Top" BorderBrush="#4C000000" BorderThickness="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "1*" />
+                    <ColumnDefinition Width = "1*" />
+                    <ColumnDefinition Width = "1*" />
+                    <ColumnDefinition Width = "2*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" x:Name="textBlock" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Rainbow" />
+                <ToggleSwitch Grid.Column="1" x:Name="toggleSwitch2" Margin="10,0,10,0" Header="Compensate" HorizontalAlignment="Stretch"  IsOn="True" Toggled="toggleSwitch2_Toggled"  />
+
+                    <Button Grid.Column="2" x:Name="button2" Margin="10" Height="45" Content="Fade to random" HorizontalAlignment="Stretch"  Background="#33FFFFFF"  BorderBrush="Black" Click="button2_Click"/>
+                <Button Grid.Column="3" x:Name="button3" Margin="10" Height="45" Content="Start faiding rainbow" HorizontalAlignment="Stretch" Background="#33FFFFFF"  BorderBrush="Black" Click="button3_Click" />
+
+            </Grid>
+            
+            <Grid Height="70" Margin="0,600,0,0" VerticalAlignment="Top" BorderBrush="#4C000000" BorderThickness="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "1*" />
+                    <ColumnDefinition Width = "1*" />
+                    <ColumnDefinition Width = "3*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" x:Name="textBlock2" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Strobing" />
+                <Button  Grid.Column="1" x:Name="button4" Margin="10" Height="45" Content="Start strobing" Background="#33FFFFFF"  BorderBrush="Black" Click="button4_Click" HorizontalAlignment="Stretch" />
+                <Slider  Grid.Column="2" x:Name="slider4" Margin="10" ValueChanged="slider4_ValueChanged" Maximum="3000" Value="500" VerticalAlignment="Center"/>
+            </Grid>
+
+
+
         </Grid>
     </Grid>
 </Page>

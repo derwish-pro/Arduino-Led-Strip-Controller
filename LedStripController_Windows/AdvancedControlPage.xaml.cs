@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -58,9 +59,9 @@ namespace LedStripController_Windows
             if (!sendControls) return;
 
             ledStripController.Fade(
-                (uint) slider1.Value,
-                (uint) slider2.Value,
-                (uint) slider3.Value,
+                (uint)slider1.Value,
+                (uint)slider2.Value,
+                (uint)slider3.Value,
                 stripChangeColorTime);
         }
 
@@ -89,28 +90,12 @@ namespace LedStripController_Windows
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof (ControlPage));
+            Frame.Navigate(typeof(ControlPage));
         }
 
-        private void button2_Click(object sender, RoutedEventArgs e)
-        {
-            ledStripController.FadeToRandom768Hue();
-        }
 
-        private void button3_Click(object sender, RoutedEventArgs e)
-        {
-            if (ledStripController.IsFaidingRainbow())
-            {
-                button3.Content = "Start faiding rainbow";
-                ledStripController.StopFaidingRainbow();
-            }
-            else
-            {
-                button3.Content = "Stop faiding rainbow ";
-                ledStripController.StartFaidingRainbow1536();
-            }
 
-        }
+
 
         private void button4_Click(object sender, RoutedEventArgs e)
         {
@@ -122,7 +107,7 @@ namespace LedStripController_Windows
             else
             {
                 button4.Content = "Stop strobing";
-                ledStripController.StartStrobe(20, (uint) slider4.Value);
+                ledStripController.StartStrobe(20, (uint)slider4.Value);
             }
         }
 
@@ -130,7 +115,72 @@ namespace LedStripController_Windows
         {
             if (ledStripController.IsStrobing())
             {
-                ledStripController.StartStrobe(10, (uint) slider4.Value);
+                ledStripController.StartStrobe(10, (uint)slider4.Value);
+            }
+        }
+
+
+
+        private void button3_Click(object sender, RoutedEventArgs e)
+        {
+            if (ledStripController.IsFaidingRainbow())
+            {
+                button3.Content = "Start faiding rainbow";
+                ledStripController.StopFaidingRainbow();
+            }
+            else
+            {
+                button3.Content = "Stop faiding rainbow ";
+                if (toggleSwitch2.IsOn)
+                    ledStripController.StartFaidingRainbow768();
+                else
+                    ledStripController.StartFaidingRainbow1536();
+
+            }
+
+        }
+
+        private async void toggleSwitch2_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (ledStripController.IsFaidingRainbow())
+            {
+                ledStripController.StopFaidingRainbow();
+
+                await Task.Delay(500);
+
+                if (toggleSwitch2.IsOn)
+                    ledStripController.StartFaidingRainbow768();
+                else
+                    ledStripController.StartFaidingRainbow1536();
+            }
+        }
+
+        private async void button2_Click(object sender, RoutedEventArgs e)
+        {
+            if (ledStripController.IsFaidingRainbow())
+            {
+                ledStripController.StopFaidingRainbow();
+
+                await Task.Delay(100);
+
+                if (toggleSwitch2.IsOn)
+                    ledStripController.FadeRandomHue768();
+                else
+                    ledStripController.FadeRandomHue1536();
+
+                await Task.Delay(500);
+
+                if (toggleSwitch2.IsOn)
+                    ledStripController.StartFaidingRainbow768();
+                else
+                    ledStripController.StartFaidingRainbow1536();
+            }
+            else
+            {
+                if (toggleSwitch2.IsOn)
+                    ledStripController.FadeRandomHue768();
+                else
+                    ledStripController.FadeRandomHue1536();
             }
         }
     }

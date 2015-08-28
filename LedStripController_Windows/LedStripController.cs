@@ -243,27 +243,34 @@ namespace LedStripController_Windows
 
 
 
-        public void FadeRandom(uint fadeTime = 500)
+        public void FadeRandomRGB(uint fadeTime = 500)
         {
-            Random rand = new Random();
-            uint r = (uint)rand.Next(0, 255);
-            uint g = (uint)rand.Next(0, 255);
-            uint b = (uint)rand.Next(0, 255);
+            uint r, g, b;
+            RGBColors.GetRandomRGB(out r,out g,out b);
+
             Fade(r, g, b, fadeTime);
         }
 
 
-        public void FadeToRandom768Hue(uint fadeTime = 500)
+        public void FadeRandomHue768(uint fadeTime = 500)
         {
-            Random rand = new Random();
-            uint hue = (uint)rand.Next(0, 767);
+            uint hue = RGBColors.GetRandomHue768();
             FadeHue768(hue, 1, 500);
+        }
+
+        public void FadeRandomHue1536(uint fadeTime = 500)
+        {
+            uint hue = RGBColors.GetRandomHue1536();
+            FadeHue1536(hue, 1, 500);
         }
 
 
         public async void StartFaidingRainbow768(uint fadeTime = 20000, float brightness = 1)
         {
             isFaidingRainbow = true;
+
+            uint transientTime = FadeToClosestHue768(fadeTime / 10, brightness);
+            await Task.Delay(TimeSpan.FromMilliseconds(transientTime));
 
             while (isFaidingRainbow)
             {
@@ -315,6 +322,36 @@ namespace LedStripController_Windows
         }
 
 
+        //return fade duration (ms)
+        public uint FadeToClosestHue768(uint maxFadeTime = 2000, float brightness = 1)
+        {
+            uint currentHue;
+            float currentBrightness;
+            RGBColors.ConvertRGBToHue768(r, g, b, out currentHue, out currentBrightness);
+
+            uint transientTime = 0;
+
+            if (currentBrightness != brightness)
+            {
+                float brightDiff = Math.Abs(currentBrightness - brightness);
+                transientTime = (uint)(brightDiff * maxFadeTime);
+            }
+
+            uint minColor = Math.Min(r, Math.Min(g, b));
+            if (minColor != 0)
+            {
+                uint transientTime2 = (uint)((float)minColor / 255 * maxFadeTime);
+                if (transientTime2 > transientTime)
+                    transientTime = transientTime2;
+            }
+
+            if (transientTime != 0)
+                FadeHue768(currentHue, brightness, transientTime);
+
+            return transientTime;
+        }
+
+
         public void StopFaidingRainbow()
         {
             isFaidingRainbow = false;
@@ -326,6 +363,11 @@ namespace LedStripController_Windows
 
             brightness = MathUtils.Clamp(brightness, 0f, 1f);
 
+            //get current hue
+            uint currentHue;
+            float currentBrightness;
+            RGBColors.ConvertRGBToHue768(r, g, b, out currentHue, out currentBrightness);
+
             uint delay = fadeTime / 768;
             uint stepFadeTime = delay;
 
@@ -333,7 +375,10 @@ namespace LedStripController_Windows
             {
                 if (!isFaidingRainbow) return;
 
-                FadeHue768(i, brightness, stepFadeTime);
+                uint hue = currentHue + i;
+                if (hue >= 768) hue -= 768;
+
+                FadeHue768(hue, brightness, stepFadeTime);
                 await Task.Delay(TimeSpan.FromMilliseconds(delay));
             }
         }

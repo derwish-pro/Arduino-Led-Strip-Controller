@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media.Protection.PlayReady;
 using Windows.Storage.Streams;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 
 namespace LedStripController_Windows
@@ -209,9 +210,9 @@ namespace LedStripController_Windows
 
         public void Fade(uint r, uint g, uint b, uint fadeTime)
         {
-            r = Clamp(r, 0, 255);
-            g = Clamp(g, 0, 255);
-            b = Clamp(b, 0, 255);
+            r = MathUtils.Clamp(r, 0, 255);
+            g = MathUtils.Clamp(g, 0, 255);
+            b = MathUtils.Clamp(b, 0, 255);
 
             this.r = r;
             this.g = g;
@@ -224,9 +225,9 @@ namespace LedStripController_Windows
 
         public void SetColor(uint r, uint g, uint b)
         {
-            r = Clamp(r, 0, 255);
-            g = Clamp(g, 0, 255);
-            b = Clamp(b, 0, 255);
+            r = MathUtils.Clamp(r, 0, 255);
+            g = MathUtils.Clamp(g, 0, 255);
+            b = MathUtils.Clamp(b, 0, 255);
 
             this.r = r;
             this.g = g;
@@ -264,25 +265,6 @@ namespace LedStripController_Windows
         {
             isFaidingRainbow = true;
 
-            brightness = Clamp(brightness, 0f, 1f);
-
-            //fade to closest color
-            if (r < g && r < b)
-            {
-                r = 0;
-            }
-            else if (g < r && g < b)
-            {
-                g = 0;
-            }
-            else
-            {
-                b = 0;
-            }
-            Fade(r, g, b, 500);
-            Task.Delay(TimeSpan.FromMilliseconds(500));
-
-
             while (isFaidingRainbow)
             {
                 await FadeRainbow768(fadeTime, brightness);
@@ -293,29 +275,43 @@ namespace LedStripController_Windows
         {
             isFaidingRainbow = true;
 
-            brightness = Clamp(brightness, 0f, 1f);
-
-            //fade to closest color
-            if (r < g && r < b)
-            {
-                r = 0;
-            }
-            else if (g < r && g < b)
-            {
-                g = 0;
-            }
-            else
-            {
-                b = 0;
-            }
-            Fade(r, g, b, 500);
-            Task.Delay(TimeSpan.FromMilliseconds(500));
-
+            uint transientTime= FadeToClosestHue1536(fadeTime/10, brightness);
+            await Task.Delay(TimeSpan.FromMilliseconds(transientTime));
 
             while (isFaidingRainbow)
             {
                 await FadeRainbow1536(fadeTime, brightness);
             }
+        }
+
+
+        //return fade duration (ms)
+        public uint FadeToClosestHue1536(uint maxFadeTime = 2000, float brightness = 1)
+        {
+            uint currentHue;
+            float currentBrightness;
+            RGBColors.ConvertRGBToHue1536(r, g, b, out currentHue, out currentBrightness);
+
+            uint transientTime=0;
+
+            if (currentBrightness != brightness)
+            {
+                float brightDiff = Math.Abs(currentBrightness - brightness);
+                transientTime = (uint)(brightDiff * maxFadeTime);
+            }
+
+            uint minColor = Math.Min(r, Math.Min(g, b));
+            if (minColor != 0)
+            {
+                uint transientTime2 = (uint) ((float) minColor/255*maxFadeTime);
+                if (transientTime2 > transientTime)
+                    transientTime = transientTime2;
+            }
+
+            if (transientTime!=0)
+                FadeHue1536(currentHue, brightness, transientTime);
+
+            return transientTime;
         }
 
 
@@ -328,7 +324,7 @@ namespace LedStripController_Windows
         {
             isFaidingRainbow = true;
 
-            brightness = Clamp(brightness, 0f, 1f);
+            brightness = MathUtils.Clamp(brightness, 0f, 1f);
 
             uint delay = fadeTime / 768;
             uint stepFadeTime = delay;
@@ -346,7 +342,13 @@ namespace LedStripController_Windows
         {
             isFaidingRainbow = true;
 
-            brightness = Clamp(brightness, 0f, 1f);
+            brightness = MathUtils.Clamp(brightness, 0f, 1f);
+
+            //get current hue
+            uint currentHue;
+            float currentBrightness;
+            RGBColors.ConvertRGBToHue1536(r, g, b, out currentHue, out currentBrightness);
+
 
             uint delay = fadeTime / 1536;
             uint stepFadeTime = delay;
@@ -355,7 +357,10 @@ namespace LedStripController_Windows
             {
                 if (!isFaidingRainbow) return;
 
-                FadeHue1536(i, brightness, stepFadeTime);
+                uint hue = currentHue + i;
+                if (hue >= 1536) hue -= 1536;
+
+                FadeHue1536(hue, brightness, stepFadeTime);
                 await Task.Delay(TimeSpan.FromMilliseconds(delay));
             }
         }
@@ -372,29 +377,7 @@ namespace LedStripController_Windows
         {
             uint r = 0, g = 0, b = 0;
 
-            brightness = Clamp(brightness, 0f, 1f);
-            hue = Clamp(hue, 0, 767);
-
-
-            if (hue < 256)
-            {
-                r = 256 - hue - 1;
-                g = hue;
-            }
-            else if (hue >= 256 && hue < 512)
-            {
-                g = 512 - hue - 1;
-                b = hue - 256;
-            }
-            else
-            {
-                b = 768 - hue - 1;
-                r = hue - 512;
-            }
-
-            r = (uint)(brightness * r);
-            g = (uint)(brightness * g);
-            b = (uint)(brightness * b);
+            RGBColors.ConvertHue768ToRGB(out r, out g, out b, hue, brightness);
 
             Fade(r, g, b, fadeTime);
         }
@@ -411,28 +394,7 @@ namespace LedStripController_Windows
         {
             uint r = 0, g = 0, b = 0;
 
-            brightness = Clamp(brightness, 0f, 1f);
-            hue = Clamp(hue, 0, 767);
-
-            if (hue < 256)
-            {
-                r = 256 - hue - 1;
-                g = hue;
-            }
-            else if (hue >= 256 && hue < 512)
-            {
-                g = 512 - hue - 1;
-                b = hue - 256;
-            }
-            else
-            {
-                b = 768 - hue - 1;
-                r = hue - 512;
-            }
-
-            r = (uint)(brightness * r);
-            g = (uint)(brightness * g);
-            b = (uint)(brightness * b);
+            RGBColors.ConvertHue768ToRGB(out r, out g, out b, hue, brightness);
 
             SetColor(r, g, b);
         }
@@ -448,77 +410,7 @@ namespace LedStripController_Windows
         {
             uint r = 0, g = 0, b = 0;
 
-            brightness = Clamp(brightness, 0f, 1f);
-            hue = Clamp(hue, 0, 1535);
-
-            /*
-            255    0-255
-            >0-255
-            0
-
-            <0-255  256-511
-            255
-            0
-
-            0      512-767
-            255  
-            >0-255
-
-            0      758-1023
-            <0-255
-            255
-
-            >0-255  1024-1279
-            0
-            255
-
-            255  1280-1536
-            0
-           <0-255
-            */
-
-
-            if (hue < 256)
-            {
-                r = 255;
-                g = hue;
-                b = 0;
-            }
-            else if (hue >= 256 && hue < 512)
-            {
-                r = 512 - hue - 1;
-                g = 255;
-                b = 0;
-            }
-            else if (hue >= 512 && hue < 768)
-            {
-                r = 0;
-                g = 255;
-                b = hue - 512;
-            }
-            else if (hue >= 768 && hue < 1024)
-            {
-                r = 0;
-                g = 1024 - hue - 1;
-                b = 255;
-            }
-            else if (hue >= 1024 && hue < 1280)
-            {
-                r = hue - 1024;
-                g = 0;
-                b = 255;
-            }
-            else
-            {
-                r = 255;
-                g = 0;
-                b = 1536 - hue - 1;
-            }
-
-
-            r = (uint)(brightness * r);
-            g = (uint)(brightness * g);
-            b = (uint)(brightness * b);
+            RGBColors.ConvertHue1536ToRGB(out r, out g, out b, hue, brightness);
 
             Fade(r, g, b, fadeTime);
         }
@@ -534,50 +426,7 @@ namespace LedStripController_Windows
         {
             uint r = 0, g = 0, b = 0;
 
-            brightness = Clamp(brightness, 0f, 1f);
-            hue = Clamp(hue, 0, 1535);
-            
-            if (hue < 256)
-            {
-                r = 255;
-                g = hue;
-                b = 0;
-            }
-            else if (hue >= 256 && hue < 512)
-            {
-                r = 512 - hue - 1;
-                g = 255;
-                b = 0;
-            }
-            else if (hue >= 512 && hue < 768)
-            {
-                r = 0;
-                g = 255;
-                b = hue - 512;
-            }
-            else if (hue >= 768 && hue < 1024)
-            {
-                r = 0;
-                g = 1024 - hue - 1;
-                b = 255;
-            }
-            else if (hue >= 1024 && hue < 1280)
-            {
-                r = hue - 1024;
-                g = 0;
-                b = 255;
-            }
-            else
-            {
-                r = 255;
-                g = 0;
-                b = 1536 - hue - 1;
-            }
-
-
-            r = (uint)(brightness * r);
-            g = (uint)(brightness * g);
-            b = (uint)(brightness * b);
+            RGBColors.ConvertHue1536ToRGB(out r, out g, out b, hue, brightness);
 
             SetColor(r, g, b);
         }
@@ -608,81 +457,8 @@ namespace LedStripController_Windows
         }
 
 
-        public static int Clamp(int value, int min, int max)
-        {
-            return (value < min) ? min : (value > max) ? max : value;
-        }
-
-        public static uint Clamp(uint value, uint min, uint max)
-        {
-            return (value < min) ? min : (value > max) ? max : value;
-        }
-
-        public static float Clamp(float value, float min, float max)
-        {
-            return (value < min) ? min : (value > max) ? max : value;
-        }
 
 
-
-
-        public uint ConvertRGBToHue1536(uint r, uint g, uint b)
-        {
-            /*
-            255    0-255
-           >0-255
-            0
-
-           <0-255  256-511
-            255
-            0
-
-            0      512-767
-            255  
-           >0-255
-
-            0      758-1023
-           <0-255
-            255
-
-           >0-255  1024-1279
-            0
-            255
-
-            255  1280-1536
-            0
-           <0-255
-            */
-
-            uint hue = 0;
-
-            if (r == 255 && g >= 0 && b == 0)
-            {
-                hue = 0 + g;
-            }
-            else if (r >= 0 && g == 255 && b == 0)
-            {
-                hue = 256 + (255 - r);
-            }
-            else if (r == 0 && g == 255 && b >= 0)
-            {
-                hue = 512 + b;
-            }
-            else if (r == 0 && g >= 0 && b == 255)
-            {
-                hue = 758 + (255 - g);
-            }
-            else if (r >= 0 && g == 0 && b == 255)
-            {
-                hue = 1024 + r;
-            }
-            else if (r == 255 && g == 0 && b >= 0)
-            {
-                hue = 1536 + (255 - b);
-            }
-
-            return hue;
-        }
 
 
     }

@@ -109,7 +109,9 @@
       <DependentUpon>ControlPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="LedStripController.cs" />
+    <Compile Include="MathUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RGBColors.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

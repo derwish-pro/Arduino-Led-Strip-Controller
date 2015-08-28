@@ -16,8 +16,10 @@ Led::Led(uint8_t pin, bool invertPWM) {
 
 	isOn = false;
 
+
 	strobe_isOn_before = false;
 	strobe_times_remain = 0;
+	isStrobing = false;
 
 	fade_time_remain = 0;
 	current_value = 0;
@@ -316,19 +318,26 @@ void Led::CalculateFadeOnOff()
 
 
 ///------------------------STROBE------------------------
-
+//times = 0 means unlimited strobing
 void Led::Strobe(unsigned int on_duration, unsigned int off_duration, unsigned int times) {
+	if (!IsStrobing()) {
+		isStrobing = true;
+		strobe_last_time = millis();
+		strobe_isOn_before = isOn;
+
+
+	}
+
 	strobe_on_duration = on_duration;
 	strobe_off_duration = off_duration;
 	strobe_times_remain = times;
-	strobe_last_time = millis();
-	strobe_isOn_before = isOn;
 
 	fadeOnOff_current_brightness = fadeOnOff_target_brightness;
 	fadeOnOff_time_remain = 0;
 }
 
 void Led::StopStrobe() {
+	isStrobing = false;
 	strobe_times_remain = 0;
 	isOn = strobe_isOn_before;
 
@@ -336,7 +345,7 @@ void Led::StopStrobe() {
 }
 
 bool Led::IsStrobing() {
-	return strobe_times_remain > 0;
+	return isStrobing;
 }
 
 void Led::CalculateStrobe()
@@ -359,9 +368,13 @@ void Led::CalculateStrobe()
 	if (time_diff >= strobe_on_duration + strobe_off_duration)
 	{
 		strobe_last_time = millis();
-		strobe_times_remain -= 1;
-		if (strobe_times_remain <= 0)
-			StopStrobe();
+
+		//0 means unlimited strobing
+		if (strobe_times_remain > 0) {
+			strobe_times_remain -= 1;
+			if (strobe_times_remain == 0)
+				StopStrobe();
+		}
 	}
 
 

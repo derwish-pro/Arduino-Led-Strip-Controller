@@ -50,6 +50,7 @@ private:
 	bool invertPWM;
 
 	//STROBE
+	bool isStrobing;
 	bool strobe_current_brightness;
 	bool strobe_isOn_before;
 	unsigned int strobe_on_duration;

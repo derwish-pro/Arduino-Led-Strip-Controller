@@ -30,7 +30,7 @@ uint8_t preset_r, preset_g, preset_b;
 void setup() {
 
 	Serial.begin(9600);
-	Serial.println("Ready");
+	Serial.println("Led strip is ready");
 
 	pinMode(LedEnablePin1, OUTPUT);
 	pinMode(LedEnablePin2, OUTPUT);
@@ -41,10 +41,10 @@ void setup() {
 	serialCommand.addCommand("off", LED_off);
 	serialCommand.addCommand("fade", fadecolor);
 	serialCommand.addCommand("strobe", strobe);
+	serialCommand.addCommand("stopstrobe", stopstrobe);
 	serialCommand.addCommand("color", setcolor);
 	serialCommand.addCommand("state", getState);
 	serialCommand.addCommand("fadetopreset", fade_to_preset);
-	serialCommand.addCommand("fadetozero", fade_to_zero);
 	serialCommand.addCommand("storepreset", storePreset);
 	serialCommand.setDefaultHandler(unrecognized);
 
@@ -56,9 +56,10 @@ void setup() {
 	buttonState = lastButtonState;
 	buttonSwitch = false;
 
-	readPreset();
+
 
 	ledStrip.TurnOff();
+	readPreset();
 	ledStrip.SetColor(preset_r, preset_g, preset_b);
 	switchLedState();
 }
@@ -111,7 +112,7 @@ void switchLedState()
 }
 
 void storePreset() {
-	Serial.println("Store presset in EEPROM");
+	Serial.println("Preset stored in EEPROM");
 	EEPROM.update(0, preset_r);
 	EEPROM.update(1, preset_g);
 	EEPROM.update(2, preset_b);
@@ -172,7 +173,9 @@ void LED_off() {
 
 void fade_to_preset()
 {
-	Serial.println("Fade to preset: ");
+	readPreset();
+
+	Serial.print("Fade to preset: ");
 
 	char *arg;
 	unsigned int fade_time;
@@ -180,34 +183,22 @@ void fade_to_preset()
 	arg = serialCommand.next();
 	if (arg != NULL) {
 		fade_time = atoi(arg);
+		Serial.println(fade_time);
 	}
 	else
 	{
-		Serial.println("OK");
+		Serial.println("bad arguments");
 		return;
 	}
+
+	Serial.println(preset_r);
+	Serial.println(preset_g);
+	Serial.println(preset_b);
 
 	ledStrip.FadeToColor(preset_r, preset_g, preset_b, fade_time);
 }
 
-void fade_to_zero()
-{
-	char *arg;
-	unsigned int fade_time;
 
-	arg = serialCommand.next();
-	if (arg != NULL) {
-		fade_time = atoi(arg);
-	}
-	else
-	{
-
-		Serial.println("OK");
-		return;
-	}
-
-	ledStrip.FadeToColor(0, 0, 0, fade_time);
-}
 
 
 
@@ -389,6 +380,12 @@ void strobe() {
 	ledStrip.Strobe(on_duration, off_duration, times);
 }
 
+void stopstrobe() {
+	Serial.print("Stop strobe");
+	ledStrip.StopStrobe();
+}
+
+
 
 void unrecognized(const char *command) {
 	Serial.println("Available commands:");
@@ -398,9 +395,9 @@ void unrecognized(const char *command) {
 	Serial.println("off 2000 - turn off leds, fade time = 2000");
 	Serial.println("fade 150 100 50 1000 - fade color to R:150,G:100,B:50, fade time = 1000");
 	Serial.println("fadetopreset 1000 - fade to color stored in EEPROM, fade time = 1000");
-	Serial.println("fadetozero 1000 - fade to R:0,G:0,B:0, fade time = 1000");
 	Serial.println("color 150 100 50 - change color to R:150,G:100,B:50");
 	Serial.println("strobe 100 900 3 - strobe 3 times, 100 ms - on, 900 ms - off");
+	Serial.println("stopstrobe - stop strobing");
 	Serial.println("storepreset - store current color to EEPROM");
 	Serial.println("state - get leds state (R,G,B,isOn)");
 

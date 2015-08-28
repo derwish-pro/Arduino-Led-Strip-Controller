@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using Windows.Storage.Streams;
-using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -18,14 +13,14 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace LedStripController_Windows
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class ControlPage : Page
+    public sealed partial class AdvancedControlPage : Page
     {
         private uint stripChangeColorTime = 1000;
         private uint stripEnableTime = 2000;
@@ -35,7 +30,7 @@ namespace LedStripController_Windows
         public bool sendControls;
 
 
-        public ControlPage()
+        public AdvancedControlPage()
         {
             this.InitializeComponent();
 
@@ -63,13 +58,13 @@ namespace LedStripController_Windows
             if (!sendControls) return;
 
             ledStripController.Fade(
-                (uint)slider1.Value,
-                (uint)slider2.Value,
-                (uint)slider3.Value,
+                (uint) slider1.Value,
+                (uint) slider2.Value,
+                (uint) slider3.Value,
                 stripChangeColorTime);
         }
 
-        private void UpdateSliders(uint r,uint g,uint b, bool isOn)
+        private void UpdateSliders(uint r, uint g, uint b, bool isOn)
         {
             sendControls = false;
 
@@ -94,7 +89,49 @@ namespace LedStripController_Windows
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof (AdvancedControlPage));
+            Frame.Navigate(typeof (ControlPage));
+        }
+
+        private void button2_Click(object sender, RoutedEventArgs e)
+        {
+            ledStripController.FadeToRandom768Hue();
+        }
+
+        private void button3_Click(object sender, RoutedEventArgs e)
+        {
+            if (ledStripController.IsFaidingRainbow())
+            {
+                button3.Content = "Start faiding rainbow";
+                ledStripController.StopFaidingRainbow();
+            }
+            else
+            {
+                button3.Content = "Stop faiding rainbow ";
+                ledStripController.StartFaidingRainbow1536();
+            }
+
+        }
+
+        private void button4_Click(object sender, RoutedEventArgs e)
+        {
+            if (ledStripController.IsStrobing())
+            {
+                button4.Content = "Start strobing";
+                ledStripController.StopStrobe();
+            }
+            else
+            {
+                button4.Content = "Stop strobing";
+                ledStripController.StartStrobe(20, (uint) slider4.Value);
+            }
+        }
+
+        private void slider4_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (ledStripController.IsStrobing())
+            {
+                ledStripController.StartStrobe(10, (uint) slider4.Value);
+            }
         }
     }
 }

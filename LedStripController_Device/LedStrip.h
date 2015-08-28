@@ -18,6 +18,7 @@ public:
 	void SetColor(uint32_t);
 	void FadeToColor(uint8_t r, uint8_t g, uint8_t b, unsigned int fadeTime);
 	void Strobe(unsigned int on_duration, unsigned int off_duration, unsigned int times);
+	void StopStrobe();
 	void Loop();
 	void TurnOn();
 	void TurnOff();

@@ -41,6 +41,12 @@ void LedStrip::Strobe(unsigned int on_duration, unsigned int off_duration, unsig
 	led_b.Strobe(on_duration, off_duration, times);
 }
 
+void LedStrip::StopStrobe() {
+	led_r.StopStrobe();
+	led_g.StopStrobe();
+	led_b.StopStrobe();
+}
+
 void LedStrip::Loop()
 {
 

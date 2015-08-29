@@ -72,7 +72,7 @@ namespace LedStripController_Windows
             App.serialPort.StopBits = SerialStopBitCount.One;
             App.serialPort.DataBits = 8;
 
-            Frame.Navigate(typeof(AdvancedControlPage));
+            Frame.Navigate(typeof(RemoteControlPage));
         }
     }
 }

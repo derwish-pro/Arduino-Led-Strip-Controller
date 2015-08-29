@@ -27,6 +27,11 @@ namespace LedStripController_Windows
     /// </summary>
     public sealed partial class RemoteControlPage : Page
     {
+        public float calibrateR = 1;
+        public float calibrateG = 0.5f;
+        public float calibrateB = 0.3f;
+
+
         private RemoteColorClient remoteColorClient;
 
         private LedStripController ledStripController = new LedStripController();
@@ -72,13 +77,14 @@ namespace LedStripController_Windows
             ColorRect.Fill = brush;
 
             //calibration
-            g = (uint)(g * 0.5);
-            b = (uint)(b * 0.3);
+            r = (uint)(r * calibrateR);
+            g = (uint)(g * calibrateG);
+            b = (uint)(b * calibrateB);
 
-            ledStripController.SetColor(r,g,b);
+            ledStripController.SetColor(r, g, b);
         }
 
-        public void OnConnected(object sender,object e)
+        public void OnConnected(object sender, object e)
         {
             StatusText.Text = "Connected";
         }
@@ -86,6 +92,13 @@ namespace LedStripController_Windows
         public void OnDisconnected(object sender, object e)
         {
             StatusText.Text = "Disconnected";
+        }
+
+        public void SetCalibration(float calibrateR, float calibrateG, float calibrateB)
+        {
+            this.calibrateR = calibrateR;
+            this.calibrateG = calibrateG;
+            this.calibrateB = calibrateB;
         }
     }
 }

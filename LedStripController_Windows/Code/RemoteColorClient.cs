@@ -17,6 +17,9 @@ namespace LedStripController_Windows.Code
 
     public class RemoteColorClient
     {
+        const int REQUEST_DELAY = 10;
+
+
         private HttpClient httpClient;
         private string serverURL;
         private bool isRunning;
@@ -77,6 +80,8 @@ namespace LedStripController_Windows.Code
 
                 try
                 {
+                    await Task.Delay(REQUEST_DELAY);
+
                     HttpResponseMessage response = await httpClient.GetAsync(serverURL);
 
                     // response.EnsureSuccessStatusCode();

@@ -1,0 +1,35 @@
+﻿<Page
+    x:Class="LedStripController_Windows.RemoteControlPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:LedStripController_Windows"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid Margin="70">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Server address:" FontSize="16" Height="20"  Margin="15,0,0,0" />
+                    <TextBox x:Name="InputAddress" Text="http://localhost:5544/" FontSize="16" Height="20" Margin="15,0,0,0" Width="261" />
+                    <Button x:Name="StartButton" Content="Start" Click="StartButton_Click" Margin="20,0,0,0" HorizontalAlignment="Stretch" Width="137" Background="#FF488AE8" Foreground="#FFF5F4F4" />
+                </StackPanel>
+                <Grid 
+                Grid.Column="1" Margin="15,0,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="OutputView" FontSize="16" Height="Auto" Margin="15,0,0,0" TextWrapping="Wrap" />
+                </Grid>
+
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                <Rectangle x:Name="ColorRect" Fill="#FF5D5D5D" Stroke="Black" Height="46" Width="100"/>
+                <TextBlock Text="Status:" FontSize="16" Height="20" Margin="15,0,0,0" />
+                <TextBlock x:Name="StatusText" Text="Disconnected" FontSize="16" Height="20" Margin="15,0,0,0" Width="200"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

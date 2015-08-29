@@ -99,19 +99,23 @@
     <Compile Include="AdvancedControlPage.xaml.cs">
       <DependentUpon>AdvancedControlPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RemoteControlPage.xaml.cs">
+      <DependentUpon>RemoteControlPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Code\RemoteColorClient.cs" />
     <Compile Include="ConnectPage.xaml.cs">
       <DependentUpon>ConnectPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="ControlPage.xaml.cs">
       <DependentUpon>ControlPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LedStripController.cs" />
-    <Compile Include="MathUtils.cs" />
+    <Compile Include="Code\LedStripController.cs" />
+    <Compile Include="Code\MathUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RGBColors.cs" />
+    <Compile Include="Code\RGBColors.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -135,6 +139,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="AdvancedControlPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RemoteControlPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

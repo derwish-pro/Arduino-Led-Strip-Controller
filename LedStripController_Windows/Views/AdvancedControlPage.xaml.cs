@@ -26,8 +26,6 @@ namespace LedStripController_Windows
         private uint stripChangeColorTime = 1000;
         private uint stripEnableTime = 2000;
 
-        private LedStripController ledStripController = new LedStripController();
-
         public bool sendControls;
 
 
@@ -35,7 +33,8 @@ namespace LedStripController_Windows
         {
             this.InitializeComponent();
 
-            ledStripController.stateRecievedEvent += UpdateSliders;
+            if (App.ledStripController!=null)
+                App.ledStripController.stateRecievedEvent += UpdateSliders;
 
             toggleSwitch.IsEnabled = false;
             slider1.IsEnabled = false;
@@ -49,7 +48,7 @@ namespace LedStripController_Windows
         {
             if (!sendControls) return;
 
-            ledStripController.TurnOnOff(toggleSwitch.IsOn, stripEnableTime);
+            App.ledStripController.TurnOnOff(toggleSwitch.IsOn, stripEnableTime);
         }
 
 
@@ -58,7 +57,7 @@ namespace LedStripController_Windows
         {
             if (!sendControls) return;
 
-            ledStripController.Fade(
+            App.ledStripController.Fade(
                 (uint)slider1.Value,
                 (uint)slider2.Value,
                 (uint)slider3.Value,
@@ -85,7 +84,7 @@ namespace LedStripController_Windows
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            ledStripController.StorePreset();
+            App.ledStripController.StorePreset();
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
@@ -99,23 +98,25 @@ namespace LedStripController_Windows
 
         private void button4_Click(object sender, RoutedEventArgs e)
         {
-            if (ledStripController.IsStrobing())
+            if (App.ledStripController.IsStrobing())
             {
                 button4.Content = "Start strobing";
-                ledStripController.StopStrobe();
+                App.ledStripController.StopStrobe();
             }
             else
             {
                 button4.Content = "Stop strobing";
-                ledStripController.StartStrobe(20, (uint)slider4.Value);
+                App.ledStripController.StartStrobe(20, (uint)slider4.Value);
             }
         }
 
         private void slider4_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            if (ledStripController.IsStrobing())
+            if (App.ledStripController == null) return;
+
+            if (App.ledStripController.IsStrobing())
             {
-                ledStripController.StartStrobe(10, (uint)slider4.Value);
+                App.ledStripController.StartStrobe(10, (uint)slider4.Value);
             }
         }
 
@@ -123,18 +124,18 @@ namespace LedStripController_Windows
 
         private void button3_Click(object sender, RoutedEventArgs e)
         {
-            if (ledStripController.IsFaidingRainbow())
+            if (App.ledStripController.IsFaidingRainbow())
             {
                 button3.Content = "Start faiding rainbow";
-                ledStripController.StopFaidingRainbow();
+                App.ledStripController.StopFaidingRainbow();
             }
             else
             {
                 button3.Content = "Stop faiding rainbow ";
                 if (toggleSwitch2.IsOn)
-                    ledStripController.StartFaidingRainbow768();
+                    App.ledStripController.StartFaidingRainbow768();
                 else
-                    ledStripController.StartFaidingRainbow1536();
+                    App.ledStripController.StartFaidingRainbow1536();
 
             }
 
@@ -142,45 +143,47 @@ namespace LedStripController_Windows
 
         private async void toggleSwitch2_Toggled(object sender, RoutedEventArgs e)
         {
-            if (ledStripController.IsFaidingRainbow())
+            if (App.ledStripController == null) return;
+
+            if (App.ledStripController.IsFaidingRainbow())
             {
-                ledStripController.StopFaidingRainbow();
+                App.ledStripController.StopFaidingRainbow();
 
                 await Task.Delay(500);
 
                 if (toggleSwitch2.IsOn)
-                    ledStripController.StartFaidingRainbow768();
+                    App.ledStripController.StartFaidingRainbow768();
                 else
-                    ledStripController.StartFaidingRainbow1536();
+                    App.ledStripController.StartFaidingRainbow1536();
             }
         }
 
         private async void button2_Click(object sender, RoutedEventArgs e)
         {
-            if (ledStripController.IsFaidingRainbow())
+            if (App.ledStripController.IsFaidingRainbow())
             {
-                ledStripController.StopFaidingRainbow();
+                App.ledStripController.StopFaidingRainbow();
 
                 await Task.Delay(100);
 
                 if (toggleSwitch2.IsOn)
-                    ledStripController.FadeRandomHue768();
+                    App.ledStripController.FadeRandomHue768();
                 else
-                    ledStripController.FadeRandomHue1536();
+                    App.ledStripController.FadeRandomHue1536();
 
                 await Task.Delay(500);
 
                 if (toggleSwitch2.IsOn)
-                    ledStripController.StartFaidingRainbow768();
+                    App.ledStripController.StartFaidingRainbow768();
                 else
-                    ledStripController.StartFaidingRainbow1536();
+                    App.ledStripController.StartFaidingRainbow1536();
             }
             else
             {
                 if (toggleSwitch2.IsOn)
-                    ledStripController.FadeRandomHue768();
+                    App.ledStripController.FadeRandomHue768();
                 else
-                    ledStripController.FadeRandomHue1536();
+                    App.ledStripController.FadeRandomHue1536();
             }
         }
     }

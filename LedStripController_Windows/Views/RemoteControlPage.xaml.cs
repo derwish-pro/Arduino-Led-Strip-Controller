@@ -34,8 +34,6 @@ namespace LedStripController_Windows
 
         private RemoteColorClient remoteColorClient;
 
-        private LedStripController ledStripController = new LedStripController();
-
 
 
         public RemoteControlPage()
@@ -81,7 +79,7 @@ namespace LedStripController_Windows
             g = (uint)(g * calibrateG);
             b = (uint)(b * calibrateB);
 
-            ledStripController.SetColor(r, g, b);
+            App.ledStripController.SetColor(r, g, b);
         }
 
         public void OnConnected(object sender, object e)

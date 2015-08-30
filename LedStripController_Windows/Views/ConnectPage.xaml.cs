@@ -7,7 +7,9 @@ using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI;
 using Windows.UI.Popups;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -29,23 +31,19 @@ namespace LedStripController_Windows
         {
             this.InitializeComponent();
 
-            GetSerialList();
-
+          //  GetSerialList();
         }
 
-        private DeviceInformationCollection devices;
 
-        public async void GetSerialList()
+        public void GetSerialList()
         {
-
-
-            string selector = SerialDevice.GetDeviceSelector();
-            devices = await DeviceInformation.FindAllAsync(selector);
-
+            List<string> devices = App.serialPort.GetSerialDevicesList();
+       
+            if (listbox1.Items != null)
+                listbox1.Items.Clear();
 
             foreach (var device in devices)
-                listbox1.Items.Add(device.Name);
-
+                listbox1.Items.Add(device);
         }
 
 
@@ -54,25 +52,25 @@ namespace LedStripController_Windows
         {
 
             int selection = listbox1.SelectedIndex;
-            DeviceInformation device = devices[selection];
-
-            App.serialPort = await SerialDevice.FromIdAsync(device.Id);
-
-            if (App.serialPort == null)
+            try
             {
-                var dialog = new MessageDialog("Cannot connect to device.");
+                App.serialPort.Connect(selection);
+            }
+            catch
+            {
+                var dialog = new MessageDialog("Connecting failed.");
                 await dialog.ShowAsync();
                 return;
             }
 
-            App.serialPort.WriteTimeout = TimeSpan.FromMilliseconds(1000);
-            App.serialPort.ReadTimeout = TimeSpan.FromMilliseconds(1000);
-            App.serialPort.BaudRate = 9600;
-            App.serialPort.Parity = SerialParity.None;
-            App.serialPort.StopBits = SerialStopBitCount.One;
-            App.serialPort.DataBits = 8;
+            App.ledStripController.Connect();
 
-            Frame.Navigate(typeof(RemoteControlPage));
+            Frame.Navigate(typeof(ControlPage));
+        }
+
+        private void buttonCancel_Click(object sender, RoutedEventArgs e)
+        {
+            GetSerialList();
         }
     }
 }

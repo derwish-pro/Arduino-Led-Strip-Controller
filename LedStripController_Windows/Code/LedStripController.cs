@@ -26,6 +26,7 @@ using Windows.Media.Protection.PlayReady;
 using Windows.Storage.Streams;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
+using LedStripController_Windows.Code;
 
 namespace LedStripController_Windows
 {
@@ -33,7 +34,7 @@ namespace LedStripController_Windows
 
     public class LedStripController
     {
-        DataReader dataReaderObject;
+
 
         bool connected;
         bool ledIsOn;
@@ -44,24 +45,47 @@ namespace LedStripController_Windows
         bool isStrobing;
         bool isFaidingRainbow;
 
+        private SerialPort serialPort;
+
         public event StateRecievedEventHandler stateRecievedEvent;
 
-        public LedStripController()
+        public LedStripController(SerialPort serialPort)
         {
-            StartReading();
+            this.serialPort = serialPort;
+            this.serialPort.ReceivedDataEvent += ReadRecievedMessage;
 
             sendTimer.Interval = TimeSpan.FromMilliseconds(5);
             sendTimer.Tick += SendMessageTimer;
-            sendTimer.Start();
 
             connectTimer.Interval = TimeSpan.FromMilliseconds(3000);
-            connectTimer.Tick += TryToConnect;
-            connectTimer.Start();
+            connectTimer.Tick += TryToConnectTimer;
 
-            GetState();
         }
 
-        public void TryToConnect(object sender, object e)
+        public void Connect()
+        {
+            GetState();
+            connectTimer.Start();
+            sendTimer.Start();
+        }
+
+        public void Disconnect()
+        {
+            connected = false;
+
+            sendTimer.Stop();
+            connectTimer.Stop();
+
+            sendMessage = null;
+            isStrobing = false;
+            isFaidingRainbow = false;
+            ledIsOn = false;
+            r = 0;
+            g = 0;
+            b = 0;
+        }
+
+        public void TryToConnectTimer(object sender, object e)
         {
             if (!connected)
                 GetState();
@@ -78,7 +102,7 @@ namespace LedStripController_Windows
         {
             if (sendMessage != null)
             {
-                WriteAsync(sendMessage);
+                serialPort.WriteAsync(sendMessage);
                 sendMessage = null;
             }
 
@@ -88,56 +112,20 @@ namespace LedStripController_Windows
         private void SendMessage(string message, bool isImportant = true)
         {
             if (isImportant)
-                WriteAsync(message);
+                serialPort.WriteAsync(message);
             else
                 sendMessage = message;
 
         }
 
-        private async void WriteAsync(string message)
-        {
-            //           if(message==null)return;
-
-            Debug.WriteLine("Send: " + message);
-
-
-            DataWriter dataWriteObject = new DataWriter(App.serialPort.OutputStream);
-
-            dataWriteObject.WriteString(message);
-
-            await dataWriteObject.StoreAsync();
-
-            dataWriteObject.DetachStream();
-        }
 
 
 
-        private async void StartReading()
-        {
 
-            dataReaderObject = new DataReader(App.serialPort.InputStream);
-
-            while (true)
-                await ReadAsync();
-
-        }
-
-        private async Task ReadAsync()
-        {
-            uint bytesRead = await dataReaderObject.LoadAsync(1024);
-
-            string receivedText = dataReaderObject.ReadString(bytesRead);
-            string[] messages = Regex.Split(receivedText, "\r\n");
-
-            foreach (var m in messages)
-                ReadRecievedMessage(m);
-
-        }
+   
 
         private void ReadRecievedMessage(string recievedMessage)
         {
-            Debug.WriteLine("Recieved: " + recievedMessage);
-
             string[] arguments = recievedMessage.Split(' ');
 
             if (arguments[0] == "State:") ReadState(arguments);

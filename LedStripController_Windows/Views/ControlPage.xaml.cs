@@ -30,7 +30,6 @@ namespace LedStripController_Windows
         private uint stripChangeColorTime = 1000;
         private uint stripEnableTime = 2000;
 
-        private LedStripController ledStripController = new LedStripController();
 
         public bool sendControls;
 
@@ -39,7 +38,8 @@ namespace LedStripController_Windows
         {
             this.InitializeComponent();
 
-            ledStripController.stateRecievedEvent += UpdateSliders;
+            if (App.ledStripController!=null)
+            App.ledStripController.stateRecievedEvent += UpdateSliders;
 
             toggleSwitch.IsEnabled = false;
             slider1.IsEnabled = false;
@@ -53,7 +53,7 @@ namespace LedStripController_Windows
         {
             if (!sendControls) return;
 
-            ledStripController.TurnOnOff(toggleSwitch.IsOn, stripEnableTime);
+            App.ledStripController.TurnOnOff(toggleSwitch.IsOn, stripEnableTime);
         }
 
 
@@ -62,7 +62,7 @@ namespace LedStripController_Windows
         {
             if (!sendControls) return;
 
-            ledStripController.Fade(
+            App.ledStripController.Fade(
                 (uint)slider1.Value,
                 (uint)slider2.Value,
                 (uint)slider3.Value,
@@ -89,7 +89,7 @@ namespace LedStripController_Windows
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            ledStripController.StorePreset();
+            App.ledStripController.StorePreset();
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)

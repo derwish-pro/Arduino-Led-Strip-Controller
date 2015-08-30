@@ -8,6 +8,8 @@ using Windows.ApplicationModel.Activation;
 using Windows.Devices.SerialCommunication;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -15,6 +17,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using LedStripController_Windows.Code;
 
 namespace LedStripController_Windows
 {
@@ -24,7 +27,9 @@ namespace LedStripController_Windows
     sealed partial class App : Application
     {
 
-        public static SerialDevice serialPort;
+        public static SerialPort serialPort;
+        public static LedStripController ledStripController;
+
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -37,6 +42,10 @@ namespace LedStripController_Windows
                 Microsoft.ApplicationInsights.WindowsCollectors.Session);
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+            serialPort=new SerialPort();
+            ledStripController=new LedStripController(serialPort);
+
         }
 
         /// <summary>
@@ -54,36 +63,64 @@ namespace LedStripController_Windows
             }
 #endif
 
-            Frame rootFrame = Window.Current.Content as Frame;
+            AppShell shell = Window.Current.Content as AppShell;
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
-            if (rootFrame == null)
+            if (shell == null)
             {
-                // Create a Frame to act as the navigation context and navigate to the first page
-                rootFrame = new Frame();
+                // Create a AppShell to act as the navigation context and navigate to the first page
+                shell = new AppShell();
 
-                rootFrame.NavigationFailed += OnNavigationFailed;
+                // Set the default language
+                shell.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
+
+                shell.AppFrame.NavigationFailed += OnNavigationFailed;
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: Load state from previously suspended application
                 }
-
-                // Place the frame in the current Window
-                Window.Current.Content = rootFrame;
             }
 
-            if (rootFrame.Content == null)
+            Window.Current.Content = shell;
+
+            if (shell.AppFrame.Content == null)
             {
-                // When the navigation stack isn't restored navigate to the first page,
-                // configuring the new page by passing required information as a navigation
-                // parameter
-                rootFrame.Navigate(typeof(ConnectPage
-                    ), e.Arguments);
+                // When the navigation stack isn't restored, navigate to the first page
+                // suppressing the initial entrance animation.
+                shell.AppFrame.Navigate(typeof(ConnectPage), e.Arguments, new Windows.UI.Xaml.Media.Animation.SuppressNavigationTransitionInfo());
             }
+
             // Ensure the current window is active
             Window.Current.Activate();
+
+            // Ensure the current window is active
+
+            /*
+            //COLORIZE TITLE BAR---------------------------------------------------------------------------
+           ApplicationViewTitleBar titleBar = ApplicationView.GetForCurrentView().TitleBar;
+            titleBar.BackgroundColor = new Color() { A = 255, R = 54, G = 60, B = 116 };
+            titleBar.ForegroundColor = new Color() { A = 255, R = 232, G = 211, B = 162 };
+            titleBar.InactiveBackgroundColor = new Color() { A = 255, R = 135, G = 141, B = 199 };
+            titleBar.InactiveForegroundColor = new Color() { A = 255, R = 232, G = 211, B = 162 };
+
+
+            titleBar.ButtonBackgroundColor = new Color() { A = 0, R = 54, G = 60, B = 116 };
+            titleBar.ButtonHoverBackgroundColor = new Color() { A = 0, R = 19, G = 21, B = 40 };
+            titleBar.ButtonPressedBackgroundColor = new Color() { A = 0, R = 232, G = 211, B = 162 };
+            titleBar.ButtonInactiveBackgroundColor = new Color() { A = 0, R = 135, G = 141, B = 199 };
+
+            // Title bar button foreground colors. Alpha must be 255.
+            titleBar.ButtonForegroundColor = new Color() { A = 255, R = 232, G = 211, B = 162 };
+            titleBar.ButtonHoverForegroundColor = new Color() { A = 255, R = 255, G = 255, B = 255 };
+            titleBar.ButtonPressedForegroundColor = new Color() { A = 255, R = 54, G = 60, B = 116 };
+            titleBar.ButtonInactiveForegroundColor = new Color() { A = 255, R = 232, G = 211, B = 162 };
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            */
+
+
+
         }
 
         /// <summary>

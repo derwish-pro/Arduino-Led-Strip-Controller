@@ -77,7 +77,7 @@ namespace LedStripController_Windows
                 App.ledStripController.Connect();
 
 
-               Frame.Navigate(typeof (ControlPage));
+               Frame.Navigate(typeof (RemoteControlPage));
 
             }
             else

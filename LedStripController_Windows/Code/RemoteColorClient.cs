@@ -37,8 +37,13 @@ namespace LedStripController_Windows.Code
             httpClient = new HttpClient();
 
             // Limit the max buffer size for the response so we don't get overwhelmed
-            httpClient.MaxResponseContentBufferSize = 256;
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+        //    httpClient.MaxResponseContentBufferSize = 256000;
+          //  httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+            this.serverURL = serverURL;
+        }
+
+        public void SetUrl(string serverURL)
+        {
             this.serverURL = serverURL;
         }
 

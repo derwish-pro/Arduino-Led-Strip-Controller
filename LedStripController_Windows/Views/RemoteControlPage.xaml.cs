@@ -32,7 +32,7 @@ namespace LedStripController_Windows
         public float calibrateB = 0.3f;
 
 
-        private RemoteColorClient remoteColorClient;
+
 
 
 
@@ -40,26 +40,43 @@ namespace LedStripController_Windows
         {
             this.InitializeComponent();
 
-            remoteColorClient = new RemoteColorClient(InputAddress.Text);
-            remoteColorClient.colorRecievedEvent += ColorRecieved;
-            remoteColorClient.onConnectedEvent += OnConnected;
-            remoteColorClient.onDisconnectedEvent += OnDisconnected;
-
+            if (App.remoteColorClient == null)
+            {
+                App.remoteColorClient = new RemoteColorClient(InputAddress.Text);
+            }
+            App.remoteColorClient.colorRecievedEvent += ColorRecieved;
+            App.remoteColorClient.onConnectedEvent += OnConnected;
+            App.remoteColorClient.onDisconnectedEvent += OnDisconnected;
+            RefrashInterface();
         }
+
+
 
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!remoteColorClient.IsRunning())
+            if (!App.remoteColorClient.IsRunning())
             {
-                remoteColorClient.StartService();
-                StartButton.Content = "Stop";
+                App.remoteColorClient.SetUrl(InputAddress.Text);
+                App.remoteColorClient.StartService();
             }
             else
             {
-                remoteColorClient.StopService();
-                StartButton.Content = "Start";
+                App.remoteColorClient.StopService();
             }
 
+            RefrashInterface();
+        }
+
+        private void RefrashInterface()
+        {
+            if (!App.remoteColorClient.IsRunning())
+            {
+                StartButton.Content = "Start";
+            }
+            else
+            {
+                StartButton.Content = "Stop";
+            }
         }
 
         public void ColorRecieved(uint r, uint g, uint b)

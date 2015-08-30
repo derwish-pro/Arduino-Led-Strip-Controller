@@ -124,6 +124,7 @@ namespace LedStripController_Windows.Code
 
         public async void SendMessage(string message)
         {
+       
             try
             {
                 if (serialPort != null)
@@ -174,11 +175,11 @@ namespace LedStripController_Windows.Code
         {
             try
             {
+                dataReaderObject = new DataReader(serialPort.InputStream);
                 while (isConnected)
                 {
                     if (serialPort != null)
                     {
-                        dataReaderObject = new DataReader(serialPort.InputStream);
                         await ReadAsync(ReadCancellationTokenSource.Token);
                     }
                 }

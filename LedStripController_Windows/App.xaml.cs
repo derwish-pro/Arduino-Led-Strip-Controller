@@ -29,7 +29,7 @@ namespace LedStripController_Windows
 
         public static SerialPort serialPort;
         public static LedStripController ledStripController;
-
+        public static RemoteColorClient remoteColorClient;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code

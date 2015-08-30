@@ -31,16 +31,24 @@ namespace LedStripController_Windows
         {
             this.InitializeComponent();
 
-          //  GetSerialList();
+            RefrashInterface();
+
+            App.serialPort.OnConnectedEvent += DeviceConnected;
+            App.serialPort.OnDisconnectedEvent += DeviceDisconnected;
+        }
+
+        ~ConnectPage()
+        {
+            App.serialPort.OnConnectedEvent -= DeviceConnected;
+            App.serialPort.OnDisconnectedEvent -= DeviceDisconnected;
         }
 
 
-        public void GetSerialList()
+        public async void GetSerialList()
         {
-            List<string> devices = App.serialPort.GetSerialDevicesList();
-       
-            if (listbox1.Items != null)
-                listbox1.Items.Clear();
+            List<string> devices = await App.serialPort.GetDevicesList();
+
+            listbox1.Items.Clear();
 
             foreach (var device in devices)
                 listbox1.Items.Add(device);
@@ -50,27 +58,63 @@ namespace LedStripController_Windows
 
         private async void buttonConnect_Click(object sender, RoutedEventArgs e)
         {
-
-            int selection = listbox1.SelectedIndex;
-            try
+            if (!App.serialPort.IsConnected())
             {
-                App.serialPort.Connect(selection);
+
+                int selection = listbox1.SelectedIndex;
+
+                if (selection<0)return;
+
+                await App.serialPort.Connect(selection);
+
+                if (!App.serialPort.IsConnected())
+                {
+                    var dialog = new MessageDialog("Connecting failed.");
+                    await dialog.ShowAsync();
+                    return;
+                }
+
+                App.ledStripController.Connect();
+
+
+               Frame.Navigate(typeof (ControlPage));
+
             }
-            catch
+            else
             {
-                var dialog = new MessageDialog("Connecting failed.");
-                await dialog.ShowAsync();
-                return;
+                App.ledStripController.Disconnect();
+                App.serialPort.Disconnect();
             }
-
-            App.ledStripController.Connect();
-
-            Frame.Navigate(typeof(ControlPage));
+          //  RefrashInterface();
         }
 
-        private void buttonCancel_Click(object sender, RoutedEventArgs e)
+        private void buttonRefrash_Click(object sender, RoutedEventArgs e)
         {
             GetSerialList();
+        }
+
+        private void RefrashInterface()
+        {
+            GetSerialList();
+
+            if (!App.serialPort.IsConnected())
+            {
+                buttonConnect.Content = "Connect";
+            }
+            else
+            {
+                buttonConnect.Content = "Disconnect";
+            }
+        }
+
+        public void DeviceConnected(object sender, object e)
+        {
+            RefrashInterface();
+        }
+
+        public void DeviceDisconnected(object sender, object e)
+        {
+            RefrashInterface();
         }
     }
 }

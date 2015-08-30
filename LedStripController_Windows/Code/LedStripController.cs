@@ -36,7 +36,7 @@ namespace LedStripController_Windows
     {
 
 
-        bool connected;
+        bool isConnected;
         bool ledIsOn;
         uint r, g, b;
         DispatcherTimer sendTimer = new DispatcherTimer();
@@ -48,6 +48,8 @@ namespace LedStripController_Windows
         private SerialPort serialPort;
 
         public event StateRecievedEventHandler stateRecievedEvent;
+        public event EventHandler OnConnectedEvent;
+        public event EventHandler OnDisconnectedEvent;
 
         public LedStripController(SerialPort serialPort)
         {
@@ -62,6 +64,11 @@ namespace LedStripController_Windows
 
         }
 
+        public bool IsConnected()
+        {
+            return isConnected;
+        }
+
         public void Connect()
         {
             GetState();
@@ -71,7 +78,9 @@ namespace LedStripController_Windows
 
         public void Disconnect()
         {
-            connected = false;
+            isConnected = false;
+            if (OnDisconnectedEvent != null) OnDisconnectedEvent(this, null);
+
 
             sendTimer.Stop();
             connectTimer.Stop();
@@ -87,7 +96,7 @@ namespace LedStripController_Windows
 
         public void TryToConnectTimer(object sender, object e)
         {
-            if (!connected)
+            if (!isConnected)
                 GetState();
         }
 
@@ -98,21 +107,21 @@ namespace LedStripController_Windows
             SendMessage("state\r\n");
         }
 
-        private void SendMessageTimer(object sender, object e)
+        private async void SendMessageTimer(object sender, object e)
         {
             if (sendMessage != null)
             {
-                serialPort.WriteAsync(sendMessage);
+                 serialPort.SendMessage(sendMessage);
                 sendMessage = null;
             }
 
         }
 
 
-        private void SendMessage(string message, bool isImportant = true)
+        private async void SendMessage(string message, bool isImportant = true)
         {
             if (isImportant)
-                serialPort.WriteAsync(message);
+                 serialPort.SendMessage(message);
             else
                 sendMessage = message;
 
@@ -148,7 +157,9 @@ namespace LedStripController_Windows
 
             if (stateRecievedEvent != null) stateRecievedEvent(r, g, b, ledIsOn);
 
-            connected = true;
+            isConnected = true;
+            if (OnConnectedEvent != null) OnConnectedEvent(this, null);
+
         }
 
         private void ReadSwitch(string[] arguments)

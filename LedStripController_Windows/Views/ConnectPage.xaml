@@ -27,7 +27,7 @@
                     <ColumnDefinition Width= "*" />
                     <ColumnDefinition Width= "3*" />
                 </Grid.ColumnDefinitions>
-                <Button x:Name="buttonCancel" Grid.Column="0" HorizontalAlignment="Stretch" Height="50" Content="Refresh"  Background="WhiteSmoke" Foreground="Black" BorderBrush="#FF6E6E6E" Click="buttonCancel_Click" />
+                <Button x:Name="buttonCancel" Grid.Column="0" HorizontalAlignment="Stretch" Height="50" Content="Refresh"  Background="WhiteSmoke" Foreground="Black" BorderBrush="#FF6E6E6E" Click="buttonRefrash_Click" />
                 <Button x:Name="buttonConnect" Grid.Column="1" HorizontalAlignment="Stretch" Height="50" Content="Connect" Background="#FF488AE8" Foreground="#FFF5F4F4" Click="buttonConnect_Click" />
             </Grid>
 

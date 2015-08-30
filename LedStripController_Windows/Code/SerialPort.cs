@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
 using Windows.Storage.Streams;
 using Windows.UI.Popups;
 using Windows.UI.Text.Core;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 
 namespace LedStripController_Windows.Code
 {
@@ -18,113 +22,272 @@ namespace LedStripController_Windows.Code
 
     public class SerialPort
     {
-        const int INCOMING_DATA_SIZE = 2014;
 
-        private SerialDevice serialPort;
-        private DeviceInformationCollection devices;
-        DataReader dataReaderObject;
         private bool isConnected;
 
         public event ReceivedDataEventHandler ReceivedDataEvent;
+        public event EventHandler OnConnectedEvent;
+        public event EventHandler OnDisconnectedEvent;
+
+        private SerialDevice serialPort = null;
+        DataWriter dataWriteObject = null;
+        DataReader dataReaderObject = null;
+
+        private ObservableCollection<DeviceInformation> listOfDevices;
+        private CancellationTokenSource ReadCancellationTokenSource;
 
 
-        public async void FindAllDevices()
+
+  
+
+
+        public SerialPort()
         {
+            listOfDevices = new ObservableCollection<DeviceInformation>();
+            FindDevices();
+        }
 
-            string selector = SerialDevice.GetDeviceSelector();
-
-            devices = await DeviceInformation.FindAllAsync(selector);
-
+        public bool IsConnected()
+        {
+            return isConnected;
         }
 
 
-        public List<string> GetSerialDevicesList()
+        public async Task<List<string>> GetDevicesList()
         {
 
-            FindAllDevices();
+            await FindDevices();
 
             List<string> devicesList = new List<string>();
 
-            if (devices!=null)
-            foreach (var device in devices)
-                devicesList.Add(device.Name);
+            if (listOfDevices != null)
+                foreach (var device in listOfDevices)
+                    devicesList.Add(device.Name);
 
             return devicesList;
         }
 
 
-        public async void Connect(int deviceIndex)
+        public async Task FindDevices()
         {
-            DeviceInformation device = devices[deviceIndex];
+            try
+            {
+                string selector = SerialDevice.GetDeviceSelector();
+                var devices = await DeviceInformation.FindAllAsync(selector);
 
-            serialPort = await SerialDevice.FromIdAsync(device.Id);
+                listOfDevices.Clear();
 
-            if (App.serialPort == null)
-                throw new Exception("Serial connecting failed.");
+                for (int i = 0; i < devices.Count; i++)
+                {
+                    listOfDevices.Add(devices[i]);
+                }
+            }
+            catch (Exception ex)
+            {
 
-            serialPort.WriteTimeout = TimeSpan.FromMilliseconds(1000);
-            serialPort.ReadTimeout = TimeSpan.FromMilliseconds(1000);
-            serialPort.BaudRate = 9600;
-            serialPort.Parity = SerialParity.None;
-            serialPort.StopBits = SerialStopBitCount.One;
-            serialPort.DataBits = 8;
-
-            isConnected = true;
-
-            StartReading();
+            }
         }
 
-        public void Disconnect()
+
+        public async Task Connect(int deviceIndex)
         {
-            isConnected = false;
-            StopReading();
+
+            DeviceInformation entry = listOfDevices[deviceIndex];
+
+            try
+            {
+                serialPort = await SerialDevice.FromIdAsync(entry.Id);
+
+
+                // Configure serial settings
+                serialPort.WriteTimeout = TimeSpan.FromMilliseconds(1000);
+                serialPort.ReadTimeout = TimeSpan.FromMilliseconds(1000);
+                serialPort.BaudRate = 9600;
+                serialPort.Parity = SerialParity.None;
+                serialPort.StopBits = SerialStopBitCount.One;
+                serialPort.DataBits = 8;
+
+                isConnected = true;
+
+                // Create cancellation token object to close I/O operations when closing the device
+                ReadCancellationTokenSource = new CancellationTokenSource();
+                StartReading();
+
+                if (OnConnectedEvent != null) OnConnectedEvent(this,null);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
-        public async void WriteAsync(string message)
+
+        public async void SendMessage(string message)
         {
-            if (!isConnected) return;
+            try
+            {
+                if (serialPort != null)
+                {
+                    // Create the DataWriter object and attach to OutputStream
+                    dataWriteObject = new DataWriter(serialPort.OutputStream);
 
-            Debug.WriteLine("Send: " + message);
+                    //Launch the WriteAsync task to perform the write
+                    await WriteAsync(message);
+                }
+            }
+            catch (Exception ex)
+            {
 
-            DataWriter dataWriteObject = new DataWriter(serialPort.OutputStream);
-
-            dataWriteObject.WriteString(message);
-
-            await dataWriteObject.StoreAsync();
-
-            dataWriteObject.DetachStream();
+            }
+            finally
+            {
+                // Cleanup once complete
+                if (dataWriteObject != null)
+                {
+                    dataWriteObject.DetachStream();
+                    dataWriteObject = null;
+                }
+            }
         }
+
+
+        private async Task WriteAsync(string message)
+        {
+            Debug.WriteLine("Writing to serial: "+ message);
+
+            Task<UInt32> storeAsyncTask;
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                // Load the text from the sendText input text box to the dataWriter object
+                dataWriteObject.WriteString(message);
+
+                // Launch an async task to complete the write operation
+                storeAsyncTask = dataWriteObject.StoreAsync().AsTask();
+
+                UInt32 bytesWritten = await storeAsyncTask;
+            }
+        }
+
 
         private async void StartReading()
         {
-            dataReaderObject = new DataReader(serialPort.InputStream);
+            try
+            {
+                while (isConnected)
+                {
+                    if (serialPort != null)
+                    {
+                        dataReaderObject = new DataReader(serialPort.InputStream);
+                        await ReadAsync(ReadCancellationTokenSource.Token);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType().Name == "TaskCanceledException")
+                {
+                    CloseDevice();
+                }
+                else
+                {
 
-            while (isConnected)
-                await ReadAsync();
+                }
+            }
+            finally
+            {
+                // Cleanup once complete
+                if (dataReaderObject != null)
+                {
+                    dataReaderObject.DetachStream();
+                    dataReaderObject = null;
+                }
+            }
+        }
+
+
+        private async Task ReadAsync(CancellationToken cancellationToken)
+        {
+            Task<UInt32> loadAsyncTask;
+
+            uint ReadBufferLength = 1024;
+
+            // If task cancellation was requested, comply
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Set InputStreamOptions to complete the asynchronous read operation when one or more bytes is available
+            dataReaderObject.InputStreamOptions = InputStreamOptions.Partial;
+
+            // Create a task object to wait for data on the serialPort.InputStream
+            loadAsyncTask = dataReaderObject.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
+
+            // Launch the task and wait
+            UInt32 bytesRead = await loadAsyncTask;
+            if (bytesRead > 0)
+            {
+                SendDataRecievedEvents(dataReaderObject.ReadString(bytesRead));
+            }
+           
 
         }
 
-        private void StopReading()
+        /// <summary>
+        /// CancelReadTask:
+        /// - Uses the ReadCancellationTokenSource to cancel read operations
+        /// </summary>
+        private void CancelReadTask()
         {
-            dataReaderObject.DetachStream();
+            if (ReadCancellationTokenSource != null)
+            {
+                if (!ReadCancellationTokenSource.IsCancellationRequested)
+                {
+                    ReadCancellationTokenSource.Cancel();
+                }
+            }
         }
 
-        private async Task ReadAsync()
+
+        private void CloseDevice()
         {
-            //if (dataReaderObject == null) return;
+            isConnected = false;
+            if (OnDisconnectedEvent != null) OnDisconnectedEvent(this, null);
 
-            uint bytesRead = await dataReaderObject.LoadAsync(INCOMING_DATA_SIZE);
+            if (serialPort != null)
+            {
+                serialPort.Dispose();
+            }
+            serialPort = null;
+        }
 
-            string receivedText = dataReaderObject.ReadString(bytesRead);
+
+        public void Disconnect()
+        {
+            try
+            {
+                CancelReadTask();
+                CloseDevice();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+
+        private void SendDataRecievedEvents(string receivedText)
+        {
+
             string[] messages = Regex.Split(receivedText, "\r\n");
 
             foreach (var message in messages)
             {
-                Debug.WriteLine("Recieved: " + message);
+                Debug.WriteLine("Readed from serial: " + message);
+
 
                 if (ReceivedDataEvent != null)
                     ReceivedDataEvent(message);
             }
         }
+
     }
 }

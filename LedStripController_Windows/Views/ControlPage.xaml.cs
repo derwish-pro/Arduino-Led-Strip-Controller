@@ -45,8 +45,14 @@ namespace LedStripController_Windows
             slider1.IsEnabled = false;
             slider2.IsEnabled = false;
             slider3.IsEnabled = false;
+
+            App.ledStripController.GetState();
         }
 
+        ~ControlPage()
+        {
+            App.ledStripController.stateRecievedEvent -= UpdateSliders;
+        }
 
 
         private void toggleSwitch_Toggled(object sender, RoutedEventArgs e)

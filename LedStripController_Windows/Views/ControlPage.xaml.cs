@@ -41,12 +41,19 @@ namespace LedStripController_Windows
             if (App.ledStripController!=null)
             App.ledStripController.stateRecievedEvent += UpdateSliders;
 
-            toggleSwitch.IsEnabled = false;
-            slider1.IsEnabled = false;
-            slider2.IsEnabled = false;
-            slider3.IsEnabled = false;
+            textBlock3.Visibility = Visibility.Visible;
+            Panel1.Visibility = Visibility.Collapsed;
 
-            App.ledStripController.GetState();
+
+            if (App.serialPort.IsConnected())
+            {
+                textBlock3.Text = "Reading data from device...";
+                App.ledStripController.GetState();
+            }
+            else
+            {
+                textBlock3.Text = "Device is not connected";
+            }
         }
 
         ~ControlPage()
@@ -59,7 +66,7 @@ namespace LedStripController_Windows
         {
             if (!sendControls) return;
 
-            App.ledStripController.TurnOnOff(toggleSwitch.IsOn, stripEnableTime);
+            App.ledStripController.TurnOnOff(toggleSwitch1.IsOn, stripEnableTime);
         }
 
 
@@ -82,12 +89,10 @@ namespace LedStripController_Windows
             slider1.Value = r;
             slider2.Value = g;
             slider3.Value = b;
-            toggleSwitch.IsOn = isOn;
+            toggleSwitch1.IsOn = isOn;
 
-            toggleSwitch.IsEnabled = true;
-            slider1.IsEnabled = true;
-            slider2.IsEnabled = true;
-            slider3.IsEnabled = true;
+            textBlock3.Visibility = Visibility.Collapsed;
+            Panel1.Visibility = Visibility.Visible;
 
             sendControls = true;
 

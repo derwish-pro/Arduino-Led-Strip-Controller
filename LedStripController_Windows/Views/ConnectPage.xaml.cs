@@ -63,21 +63,24 @@ namespace LedStripController_Windows
 
                 int selection = listbox1.SelectedIndex;
 
-                if (selection<0)return;
+                if (selection < 0) return;
 
                 await App.serialPort.Connect(selection);
 
                 if (!App.serialPort.IsConnected())
                 {
-                    var dialog = new MessageDialog("Connecting failed.");
+                    ContentDialog dialog = new ContentDialog();
+                    dialog.Title = "Connection failed";
+                    dialog.Content = "Try to select another device";
+                    dialog.PrimaryButtonText = "OK";
                     await dialog.ShowAsync();
+
                     return;
                 }
 
                 App.ledStripController.Connect();
 
-
-               Frame.Navigate(typeof (RemoteControlPage));
+                Frame.Navigate(typeof(ControlPage));
 
             }
             else
@@ -85,7 +88,7 @@ namespace LedStripController_Windows
                 App.ledStripController.Disconnect();
                 App.serialPort.Disconnect();
             }
-          //  RefrashInterface();
+            //  RefrashInterface();
         }
 
         private void buttonRefrash_Click(object sender, RoutedEventArgs e)

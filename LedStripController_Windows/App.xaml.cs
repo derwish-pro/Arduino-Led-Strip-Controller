@@ -48,7 +48,7 @@ namespace LedStripController_Windows
 
         }
 
-
+        public AppShell shell;
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -65,7 +65,7 @@ namespace LedStripController_Windows
             }
 #endif
 
-            AppShell shell = Window.Current.Content as AppShell;
+            shell = Window.Current.Content as AppShell;
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
@@ -86,6 +86,10 @@ namespace LedStripController_Windows
             }
 
             Window.Current.Content = shell;
+
+
+            shell.AppFrame.Navigated += shell.OnPageCanged;
+
 
             if (shell.AppFrame.Content == null)
             {

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("LedStripController_Windows")]
+[assembly: AssemblyTitle("Light Control")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("LedStripController_Windows")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyProduct("Light Control")]
+[assembly: AssemblyCopyright("Derwish. Copyright ©  2015.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

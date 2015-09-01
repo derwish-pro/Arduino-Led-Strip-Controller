@@ -7,6 +7,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Foundation.Metadata;
 using Windows.UI.Core;
+using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
@@ -44,7 +45,7 @@ namespace LedStripController_Windows
                 },
                 new NavMenuItem()
                 {
-                    Symbol = Symbol.Stop,
+                    Symbol = Symbol.Admin,
                     Label = "Advanced",
                     DestPage = typeof(AdvancedControlPage)
                 },
@@ -74,95 +75,13 @@ namespace LedStripController_Windows
                 this.TogglePaneButton.Focus(FocusState.Programmatic);
             };
 
-            SystemNavigationManager.GetForCurrentView().BackRequested += SystemNavigationManager_BackRequested;
-
 
             NavMenuList.ItemsSource = navlist;
         }
 
         public Frame AppFrame { get { return this.frame; } }
 
-        /// <summary>
-        /// Default keyboard focus movement for any unhandled keyboarding
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AppShell_KeyDown(object sender, KeyRoutedEventArgs e)
-        {
-            FocusNavigationDirection direction = FocusNavigationDirection.None;
-            switch (e.Key)
-            {
-                case Windows.System.VirtualKey.Left:
-                case Windows.System.VirtualKey.GamepadDPadLeft:
-                case Windows.System.VirtualKey.GamepadLeftThumbstickLeft:
-                case Windows.System.VirtualKey.NavigationLeft:
-                    direction = FocusNavigationDirection.Left;
-                    break;
-                case Windows.System.VirtualKey.Right:
-                case Windows.System.VirtualKey.GamepadDPadRight:
-                case Windows.System.VirtualKey.GamepadLeftThumbstickRight:
-                case Windows.System.VirtualKey.NavigationRight:
-                    direction = FocusNavigationDirection.Right;
-                    break;
-
-                case Windows.System.VirtualKey.Up:
-                case Windows.System.VirtualKey.GamepadDPadUp:
-                case Windows.System.VirtualKey.GamepadLeftThumbstickUp:
-                case Windows.System.VirtualKey.NavigationUp:
-                    direction = FocusNavigationDirection.Up;
-                    break;
-
-                case Windows.System.VirtualKey.Down:
-                case Windows.System.VirtualKey.GamepadDPadDown:
-                case Windows.System.VirtualKey.GamepadLeftThumbstickDown:
-                case Windows.System.VirtualKey.NavigationDown:
-                    direction = FocusNavigationDirection.Down;
-                    break;
-            }
-
-            if (direction != FocusNavigationDirection.None)
-            {
-                var control = FocusManager.FindNextFocusableElement(direction) as Control;
-                if (control != null)
-                {
-                    control.Focus(FocusState.Programmatic);
-                    e.Handled = true;
-                }
-            }
-        }
-
-        #region BackRequested Handlers
-
-        private void SystemNavigationManager_BackRequested(object sender, BackRequestedEventArgs e)
-        {
-            bool handled = e.Handled;
-            this.BackRequested(ref handled);
-            e.Handled = handled;
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            bool ignored = false;
-            this.BackRequested(ref ignored);
-        }
-
-        private void BackRequested(ref bool handled)
-        {
-            // Get a hold of the current frame so that we can inspect the app back stack.
-
-            if (this.AppFrame == null)
-                return;
-
-            // Check to see if this is the top-most page on the app back stack.
-            if (this.AppFrame.CanGoBack && !handled)
-            {
-                // If not, set the event to handled and go back to the previous page in the app.
-                handled = true;
-                this.AppFrame.GoBack();
-            }
-        }
-
-        #endregion
+    
 
         #region Navigation
 
@@ -303,6 +222,20 @@ namespace LedStripController_Windows
             {
                 args.ItemContainer.ClearValue(AutomationProperties.NameProperty);
             }
+        }
+
+        public void OnPageCanged(object sender,object args)
+        {
+            Frame fr = sender as Frame;
+
+            for (int i = 0; i < navlist.Count; i++)
+            {
+                if (fr.CurrentSourcePageType == navlist[i].DestPage)
+                {
+                    NavMenuList.SelectedIndex = i;
+                }
+            }
+            
         }
     }
 }

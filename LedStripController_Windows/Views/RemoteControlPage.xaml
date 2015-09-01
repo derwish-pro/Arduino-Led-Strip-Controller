@@ -8,28 +8,23 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid Margin="70">
-            <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Server address:" FontSize="16" Height="20"  Margin="15,0,0,0" />
-                    <TextBox x:Name="InputAddress" Text="http://localhost:5544/" FontSize="16" Height="20" Margin="15,0,0,0" Width="261" />
-                    <Button x:Name="StartButton" Content="Start" Click="StartButton_Click" Margin="20,0,0,0" HorizontalAlignment="Stretch" Width="137" Background="#FF488AE8" Foreground="#FFF5F4F4" />
-                </StackPanel>
-                <Grid 
-                Grid.Column="1" Margin="15,0,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock x:Name="OutputView" FontSize="16" Height="Auto" Margin="15,0,0,0" TextWrapping="Wrap" />
-                </Grid>
 
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                <Rectangle x:Name="ColorRect" Fill="#FF5D5D5D" Stroke="Black" Height="46" Width="100"/>
-                <TextBlock Text="Status:" FontSize="16" Height="20" Margin="15,0,0,0" />
-                <TextBlock x:Name="StatusText" Text="Disconnected" FontSize="16" Height="20" Margin="15,0,0,0" Width="200"/>
-            </StackPanel>
+        <Grid Margin="30,0,30,30">
+
+            <ScrollViewer  VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
+                <StackPanel x:Name="Panel1" Margin="10">
+                    <TextBlock Text="Server address:"  Margin="10" FontSize="16"  />
+                    <TextBox x:Name="InputAddress"  Margin="10" Text="http://localhost:5544/" FontSize="16" Width="300" HorizontalAlignment="Left" />
+                    <Button x:Name="StartButton" Margin="10"  Content="Start" Click="StartButton_Click"  Width="200" Background="#FF488AE8" Foreground="#FFF5F4F4" />
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
+
+        <StackPanel Margin="10" Orientation="Horizontal" VerticalAlignment="Bottom">
+            <Rectangle x:Name="ColorRect" Fill="#FFF" Stroke="Black" Height="30" Width="100"/>
+            <TextBlock Text="Status:" FontSize="16" Height="20" Margin="15,0,0,0" />
+            <TextBlock x:Name="StatusText" Text="Disconnected" FontSize="16" Height="20" Margin="15,0,0,0" Width="200"/>
+        </StackPanel>
+
     </Grid>
 </Page>

@@ -36,12 +36,21 @@ namespace LedStripController_Windows
             if (App.ledStripController!=null)
                 App.ledStripController.stateRecievedEvent += UpdateSliders;
 
-            toggleSwitch.IsEnabled = false;
-            slider1.IsEnabled = false;
-            slider2.IsEnabled = false;
-            slider3.IsEnabled = false;
 
-            App.ledStripController.GetState();
+            textBlock3.Visibility = Visibility.Visible;
+            Panel1.Visibility = Visibility.Collapsed;
+            Panel2.Visibility = Visibility.Collapsed;
+            Panel3.Visibility = Visibility.Collapsed;
+
+            if (App.serialPort.IsConnected())
+            {
+                textBlock3.Text = "Reading data from device...";
+                App.ledStripController.GetState();
+            }
+            else
+            {
+                textBlock3.Text = "Device is not connected";
+            }
         }
 
         ~AdvancedControlPage ()
@@ -80,10 +89,10 @@ namespace LedStripController_Windows
             slider3.Value = b;
             toggleSwitch.IsOn = isOn;
 
-            toggleSwitch.IsEnabled = true;
-            slider1.IsEnabled = true;
-            slider2.IsEnabled = true;
-            slider3.IsEnabled = true;
+            textBlock3.Visibility = Visibility.Collapsed;
+            Panel1.Visibility = Visibility.Visible;
+            Panel2.Visibility = Visibility.Visible;
+            Panel3.Visibility = Visibility.Visible;
 
             sendControls = true;
 
@@ -92,11 +101,6 @@ namespace LedStripController_Windows
         private void button_Click(object sender, RoutedEventArgs e)
         {
             App.ledStripController.StorePreset();
-        }
-
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(ControlPage));
         }
 
 
